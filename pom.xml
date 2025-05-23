@@ -25,6 +25,10 @@
                         <version>3.5.0</version>
                         <configuration>
                             <mainClass>onebrc.CreateMeasurements</mainClass>
+                            <arguments>
+                                <!-- default to one million rows -->
+                                <argument>1000000</argument>
+                            </arguments>
                         </configuration>
                     </plugin>
                 </plugins>
