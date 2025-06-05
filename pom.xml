@@ -34,7 +34,7 @@
                         <artifactId>exec-maven-plugin</artifactId>
                         <version>3.5.0</version>
                         <configuration>
-                            <mainClass>onebrc.CreateMeasurements</mainClass>
+                            <mainClass>onebrc.tool.CreateMeasurements</mainClass>
                             <arguments>
                                 <!-- default to one million rows -->
                                 <argument>1000000</argument>
