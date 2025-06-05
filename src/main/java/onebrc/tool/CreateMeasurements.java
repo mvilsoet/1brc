@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package onebrc;
+package onebrc.tool;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -42,7 +42,7 @@ public class CreateMeasurements {
         long start = System.currentTimeMillis();
 
         if (args.length != 1) {
-            System.out.println("Usage: create_measurements.sh <number of records to create>");
+            System.out.println("Usage: create_measurements <number of records to create>");
             System.exit(1);
         }
 
