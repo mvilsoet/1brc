@@ -1,17 +1,24 @@
 package onebrc.api;
 
 public class Stats {
-    private final double min;
-    private final double max;
-    private final double avg;
+    public String name;
+    public double min, max, sum;
+    public int count;
 
-    public Stats(double min, double max, double avg) {
-        this.min = min;
-        this.max = max;
-        this.avg = avg;
+    public Stats(String name, double value) {
+        this.name = name;
+        this.min = this.max = this.sum = value;
+        this.count = 1;
     }
 
-    public double getMin() { return min; }
-    public double getMax() { return max; }
-    public double getAvg() { return avg; }
+    public void add(double value) {
+        min = Math.min(min, value);
+        max = Math.max(max, value);
+        sum += value;
+        count++;
+    }
+
+    public double avg() {
+        return sum / count;
+    }
 }
