@@ -1,7 +1,8 @@
 package onebrc.api;
 
-import java.util.concurrent.Future;
+import java.util.Map;
+import java.util.concurrent.Callable;
 
-public interface Parser {
-    Future<Stats> parse(int rowStart, int rowEnd);
+public interface Parser extends Callable<Map<String, Stats>> {
+    // call() is inherited
 }

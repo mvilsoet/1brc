@@ -21,4 +21,15 @@ public class Stats {
     public double avg() {
         return sum / count;
     }
+
+    public void merge(Stats other) {
+        if (!this.name.equals(other.name)) {
+            throw new IllegalArgumentException("Cannot merge Stats of different stations");
+        }
+        this.min = Math.min(this.min, other.min);
+        this.max = Math.max(this.max, other.max);
+        this.sum += other.sum;
+        this.count += other.count;
+    }
+
 }
