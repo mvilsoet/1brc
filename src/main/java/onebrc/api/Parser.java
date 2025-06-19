@@ -1,5 +1,6 @@
 package onebrc.api;
 
+import onebrc.tool.Stats;
 import java.util.Map;
 import java.util.concurrent.Callable;
 

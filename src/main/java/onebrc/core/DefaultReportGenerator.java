@@ -1,7 +1,7 @@
 package onebrc.core;
 
 import onebrc.api.ReportGenerator;
-import onebrc.api.Stats;
+import onebrc.tool.Stats;
 import java.util.List;
 
 public class DefaultReportGenerator implements ReportGenerator {

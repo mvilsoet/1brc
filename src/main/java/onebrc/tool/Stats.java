@@ -1,4 +1,4 @@
-package onebrc.api;
+package onebrc.tool;
 
 public class Stats {
     public String name;

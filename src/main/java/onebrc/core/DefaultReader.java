@@ -1,11 +1,12 @@
 package onebrc.core;
 
 import onebrc.api.Reader;
-import onebrc.api.Stats;
-
+import onebrc.tool.Stats;
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.*;
 
 public class DefaultReader implements Reader {
@@ -30,31 +31,37 @@ public class DefaultReader implements Reader {
             while ((line = reader.readLine()) != null) {
                 chunk.add(line);
                 if (chunk.size() == CHUNK_SIZE) {
-                    // Submit parser task for this chunk
-                    DefaultParser parser = new DefaultParser(new ArrayList<>(chunk));
-                    futures.add(executor.submit(parser));
+                    submitChunk(new ArrayList<>(chunk), futures);
                     chunk.clear();
                 }
             }
+
             if (!chunk.isEmpty()) {
-                DefaultParser parser = new DefaultParser(new ArrayList<>(chunk));
-                futures.add(executor.submit(parser));
+                submitChunk(new ArrayList<>(chunk), futures);
             }
 
-            // Wait for all tasks and reduce results
             for (Future<Map<String, Stats>> future : futures) {
                 Map<String, Stats> partial = future.get();
-                partial.forEach((name, partialStat) ->
-                        combinedStats.merge(name, partialStat, (existing, incoming) -> {
-                            existing.merge(incoming);
-                            return existing;
-                        })
-                );
+                reduceChunk(combinedStats, partial);
             }
         } catch (Exception e) {
             throw new RuntimeException("Failed to read file concurrently: " + filename, e);
         }
 
         return new ArrayList<>(combinedStats.values());
+    }
+
+    private void submitChunk(List<String> chunk, List<Future<Map<String, Stats>>> futures) {
+        DefaultParser parser = new DefaultParser(chunk.stream());
+        futures.add(executor.submit(parser));
+    }
+
+    private void reduceChunk(Map<String, Stats> combinedStats, Map<String, Stats> partial) {
+        partial.forEach((name, partialStat) ->
+                combinedStats.merge(name, partialStat, (existing, incoming) -> {
+                    existing.merge(incoming);
+                    return existing;
+                })
+        );
     }
 }
