@@ -21,17 +21,17 @@ public class DefaultReader implements Reader {
 
     @Override
     public List<Stats> read() {
-        Map<String, Stats> combinedStats = new ConcurrentHashMap<>();
-        List<Future<Map<String, Stats>>> futures = new ArrayList<>();
+        Map<String, Stats> combinedStats = new ConcurrentHashMap<>();  // final merged stats in thread-safe map
+        List<Future<Map<String, Stats>>> futures = new ArrayList<>();  // async parsing tasks (aka Parser.call()) submitted to executor
 
         try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
-            List<String> chunk = new ArrayList<>(CHUNK_SIZE);
+            List<String> chunk = new ArrayList<>(CHUNK_SIZE);  // read up to CHUNK_SIZE lines into memory at a time
             String line;
 
             while ((line = reader.readLine()) != null) {
                 chunk.add(line);
                 if (chunk.size() == CHUNK_SIZE) {
-                    submitChunk(new ArrayList<>(chunk), futures);
+                    submitChunk(new ArrayList<>(chunk), futures);  // copy chunk array into job
                     chunk.clear();
                 }
             }
@@ -40,15 +40,15 @@ public class DefaultReader implements Reader {
                 submitChunk(new ArrayList<>(chunk), futures);
             }
 
-            for (Future<Map<String, Stats>> future : futures) {
-                Map<String, Stats> partial = future.get();
+            for (Future<Map<String, Stats>> future : futures) {  // loops (waits) until all parsing tasks are done
+                Map<String, Stats> partial = future.get();  // process any finished tasks as we get them
                 reduceChunk(combinedStats, partial);
             }
         } catch (Exception e) {
             throw new RuntimeException("Failed to read file concurrently: " + filename, e);
         }
 
-        return new ArrayList<>(combinedStats.values());
+        return new ArrayList<>(combinedStats.values());  // convert finished map to a list. TODO this seems silly but cheap: O(stationNames)
     }
 
     private void submitChunk(List<String> chunk, List<Future<Map<String, Stats>>> futures) {
