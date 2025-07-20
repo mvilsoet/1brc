@@ -31,7 +31,7 @@ public class DefaultReader implements Reader {
             while ((line = reader.readLine()) != null) {
                 chunk.add(line);
                 if (chunk.size() == CHUNK_SIZE) {
-                    submitChunk(new ArrayList<>(chunk), futures);  // copy chunk array into job
+                    submitChunk(new ArrayList<>(chunk), futures);  // copy ref to chunk array into job
                     chunk.clear();
                 }
             }
@@ -39,9 +39,9 @@ public class DefaultReader implements Reader {
             if (!chunk.isEmpty()) {
                 submitChunk(new ArrayList<>(chunk), futures);
             }
-
-            for (Future<Map<String, Stats>> future : futures) {  // loops (waits) until all parsing tasks are done
-                Map<String, Stats> partial = future.get();  // process any finished tasks as we get them
+            // TODO this is mostly parallel but restricted to order and is possible to be slow if an early future is taking awhile. Guava Event Bus?
+            for (Future<Map<String, Stats>> future : futures) {  // go thru list of futures
+                Map<String, Stats> partial = future.get();  // waiting for that future to come in
                 reduceChunk(combinedStats, partial);
             }
         } catch (Exception e) {
