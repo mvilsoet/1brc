@@ -46,48 +46,24 @@ public class CreateMeasurements {
             System.exit(1);
         }
 
-        int size = 0;
+        final int size;
         try {
             size = Integer.parseInt(args[0]);
-        }
-        catch (NumberFormatException e) {
+        } catch (NumberFormatException e) {
             System.out.println("Invalid value for <number of records to create>");
             System.out.println("Usage: CreateMeasurements <number of records to create>");
             System.exit(1);
+            return; // To satisfy compiler about initialization
         }
 
         try {
             Files.deleteIfExists(MEASUREMENT_FILE);
             Files.createFile(MEASUREMENT_FILE);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             // ignore
         }
 
         // @formatter:off
-        // data from https://en.wikipedia.org/wiki/List_of_cities_by_average_temperature;
-        // converted using https://wikitable2csv.ggor.de/
-        // brought to form using DuckDB:
-        // D copy (
-        //     select City, regexp_extract(Year,'(.*)\n.*', 1) as AverageTemp
-        //     from (
-        //         select City,Year
-        //         from read_csv_auto('List_of_cities_by_average_temperature_1.csv', header = true)
-        //         union
-        //         select City,Year
-        //         from read_csv_auto('List_of_cities_by_average_temperature_2.csv', header = true)
-        //         union
-        //         select City,Year
-        //         from read_csv_auto('List_of_cities_by_average_temperature_3.csv', header = true)
-        //         union
-        //         select City,Year
-        //         from read_csv_auto('List_of_cities_by_average_temperature_4.csv', header = true)
-        //         union
-        //         select City,Year
-        //         from read_csv_auto('List_of_cities_by_average_temperature_5.csv', header = true)
-        //         )
-        // ) TO 'output.csv' (HEADER, DELIMITER ',');
-        // @formatter:on
         List<WeatherStation> stations = List.of(
                 new WeatherStation("Abha", 18.0),
                 new WeatherStation("Abidjan", 26.0),
@@ -501,9 +477,12 @@ public class CreateMeasurements {
                 new WeatherStation("Yinchuan", 9.0),
                 new WeatherStation("Zagreb", 10.7),
                 new WeatherStation("Zanzibar City", 26.0),
-                new WeatherStation("Zürich", 9.3));
+                new WeatherStation("Zürich", 9.3)
+        );
 
-        int chunkSize = (size / 10_000_000) == 0 ? size : 10_000_000;
+        // @formatter:on
+
+        final int chunkSize = (size / 10_000_000) == 0 ? size : 10_000_000;
         int numberOfFutures = size / chunkSize;
         if (numberOfFutures == 0) {
             numberOfFutures = 1;
@@ -511,20 +490,31 @@ public class CreateMeasurements {
         CompletableFuture<?>[] futures = new CompletableFuture[numberOfFutures];
 
         for (int n = 0; n < numberOfFutures; n++) {
-            int finalN = n;
+            final int finalN = n;
             futures[n] = CompletableFuture.runAsync(() -> {
-                StringBuilder builder = new StringBuilder();
-                for (int i = finalN * chunkSize; i <= (finalN + 1) * chunkSize - 1; i++) {
-                    WeatherStation station = stations.get(ThreadLocalRandom.current().nextInt(stations.size()));
-                    builder.append(station.id())
-                            .append(";")
-                            .append(station.measurement())
-                            .append('\n');
-                }
                 try (BufferedWriter bw = Files.newBufferedWriter(MEASUREMENT_FILE, StandardOpenOption.APPEND)) {
-                    bw.write(builder.toString());
-                }
-                catch (IOException e) {
+                    StringBuilder builder = new StringBuilder();
+                    int batchSize = 10_000;
+
+                    final int startIndex = finalN * chunkSize;
+                    final int endIndex = Math.min((finalN + 1) * chunkSize - 1, size - 1);
+
+                    for (int i = startIndex; i <= endIndex; i++) {
+                        WeatherStation station = stations.get(ThreadLocalRandom.current().nextInt(stations.size()));
+                        builder.append(station.id())
+                                .append(";")
+                                .append(station.measurement())
+                                .append('\n');
+
+                        if ((i - startIndex + 1) % batchSize == 0) {
+                            bw.write(builder.toString());
+                            builder.setLength(0);
+                        }
+                    }
+                    if (builder.length() > 0) {
+                        bw.write(builder.toString());
+                    }
+                } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
             }, EXECUTOR_SERVICE);
@@ -532,6 +522,6 @@ public class CreateMeasurements {
 
         CompletableFuture.allOf(futures).join();
 
-        System.out.printf("Created file with %,d measurements in %s ms%n", size, System.currentTimeMillis() - start);
+        System.out.printf("Created file with %,d measurements in %d ms%n", size, System.currentTimeMillis() - start);
     }
 }
