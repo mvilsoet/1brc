@@ -36,8 +36,8 @@
                         <configuration>
                             <mainClass>onebrc.tool.CreateMeasurements</mainClass>
                             <arguments>
-                                <!-- default to one million rows -->
-                                <argument>1000000</argument>
+                                <!-- default to one billion rows (WARNING: GENERATES 13.77GB TXT FILE) -->
+                                <argument>1000000000</argument>
                             </arguments>
                         </configuration>
                     </plugin>
