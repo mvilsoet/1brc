@@ -6,5 +6,7 @@ This project parses (min, max, average) a billion rows but really fast.
 ![uml.png](uml.png)
 
 ## TODO:
-- like, the whole thing
+- DefaultReportGenerator
+- Unit tests
+- How-to use this repo
 
