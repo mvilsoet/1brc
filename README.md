@@ -1,6 +1,6 @@
 # 1brc
 This project parses (min, max, average) a billion rows but really fast. 
-- Row format (measurements.txt): String;Int
+- Row format of measurements.txt: String;Decimal\n
 - https://github.com/gunnarmorling/1brc/tree/main
 
 ## Class Diagram
