@@ -7,7 +7,7 @@ This project parses (min, max, average) a billion rows but really fast.
 
 ## TODO:
 - DefaultReportGenerator creates logfiles
-- Telemetry interface has .report(message) 
+- Telemetry interface has .report(message, type) 
   - NoOpTelemeter as DefaultTelemeter.
   - JFRTelemeter using JFR. maybe pass --verbose to enable 
 - Unit tests / testing logic accuracy with known measurement_test.txt
