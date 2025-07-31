@@ -1,5 +1,6 @@
 # 1brc
 This project parses (min, max, average) a billion rows but really fast. 
+- Row format (csv): String;Int
 - https://github.com/gunnarmorling/1brc/tree/main
 
 ## Class Diagram
