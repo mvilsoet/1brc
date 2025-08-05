@@ -2,6 +2,7 @@ package onebrc.core;
 
 import onebrc.api.Reader;
 import onebrc.tool.Stats;
+import onebrc.telemetry.Telemetry;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
@@ -12,11 +13,13 @@ import java.util.concurrent.*;
 public class DefaultReader implements Reader {
     private final String filename;
     private final ExecutorService executor;
+    private final Telemetry telemetry;
     private static final int CHUNK_SIZE = 250000;
 
-    public DefaultReader(String filename, ExecutorService executor) {
+    public DefaultReader(String filename, ExecutorService executor, Telemetry telemetry) {
         this.filename = filename;
         this.executor = executor;
+        this.telemetry = telemetry;
     }
 
     @Override
@@ -42,6 +45,7 @@ public class DefaultReader implements Reader {
             // TODO this is mostly parallel but restricted to order and is possible to be slow if an early future is taking awhile. Guava Event Bus?
             for (Future<Map<String, Stats>> future : futures) {  // go thru list of futures
                 Map<String, Stats> partial = future.get();  // waiting for that future to come in
+                telemetry.recordMergeChunk(partial.size());
                 reduceChunk(combinedStats, partial);
             }
         } catch (Exception e) {

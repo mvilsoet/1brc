@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>onebrc</groupId>
@@ -15,7 +16,7 @@
     </properties>
 
     <dependencies>
-        <!-- JUnit 5 (Jupiter) for writing & running tests -->
+        <!-- JUnit 5 for tests -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
@@ -23,6 +24,22 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Enable JFR during mvn test -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.5</version>
+                <configuration>
+                    <argLine>
+                        -Donebrc.jfr=true -XX:StartFlightRecording=name=onebrc-test,settings=default,dumponexit=true,filename=${project.build.directory}/onebrc-test.jfr
+                    </argLine>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
     <profiles>
         <profile>
@@ -36,7 +53,6 @@
                         <configuration>
                             <mainClass>onebrc.tool.CreateMeasurements</mainClass>
                             <arguments>
-                                <!-- default to one billion rows (WARNING: GENERATES 13.77GB TXT FILE) -->
                                 <argument>1000000000</argument>
                             </arguments>
                         </configuration>
@@ -45,5 +61,4 @@
             </build>
         </profile>
     </profiles>
-
 </project>
