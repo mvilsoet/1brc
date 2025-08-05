@@ -1,0 +1,6 @@
+StationA;10.0
+StationB;5.5
+StationA;20.0
+StationC;7.25
+StationB;4.5
+StationA;3.0
