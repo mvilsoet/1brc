@@ -7,9 +7,8 @@ import java.util.List;
 public class DefaultReportGenerator implements ReportGenerator {
     @Override
     public void generate(List<Stats> stats) {
-        // Basic print, probably should override this
         int total_count = 0;
-        for (Stats s : stats) {
+        for (Stats s : stats) {  // prints out stats for each station, probably should change this
             total_count = total_count + s.count;
             System.out.printf("%s: min=%.2f max=%.2f avg=%.2f%n", s.name, s.min, s.max, s.avg());
         }
